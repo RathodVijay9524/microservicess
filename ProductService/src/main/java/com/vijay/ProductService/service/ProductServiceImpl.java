@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.*;
 
@@ -86,6 +88,32 @@ public class ProductServiceImpl implements ProductService {
         product.setQuantity(product.getQuantity()-quantity);
         productRepository.save(product);
         log.info("Product Quantity updated successfully");
+    }
+    @Override
+    public void deleteProductById(long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new ProductServiceCustomException("Product with given id not found","PRODUCT_NOT_FOUND"));
+        productRepository.delete(product);
+
+    }
+
+    @Override
+    public List<ProductResponse> getAllProduct() {
+
+        List<Product> products = productRepository.findAll();
+
+        return  products.stream().map(product -> {
+            ProductResponse response=new ProductResponse();
+            BeanUtils.copyProperties(product, response);
+
+            return  response;
+        }).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public void updateProduct(long productId, ProductRequest productRequest) {
+
     }
 }
 
